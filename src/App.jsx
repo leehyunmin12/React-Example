@@ -1,8 +1,8 @@
-//1. 검색입력으로 search  바꾸고
+//1. 검색입력으로 search 바꾸고
 //2. todos + search + statusFilter 조합해서 보이는 목록 계산
 //3. 추가 폼으로 새 할일을 부모 콜백 호출로 등록
 
-import { useState, useMemo } from "react"
+import { useState, useMemo } from "react";
 
 export default function App() {
 
@@ -18,7 +18,8 @@ export default function App() {
   const visibleTodos = useMemo(() => {
     const keyword = search.trim().toLowerCase()
     return todos.filter((t) => {
-      const matchKeyword = keyword === "" || t.title.toLowerCase().includes(keyword)
+      const matchKeyword = keyword === "" ||
+        t.title.toLowerCase().includes(keyword)
       const matchStatus =
         statusFilter === "all" ? true :
           statusFilter === "active" ? !t.done :
@@ -41,6 +42,15 @@ export default function App() {
       prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
   }
 
+  const onDelete = (id) => {
+    setTodos((prev) =>
+      prev.filter((todos) => todos.id !== id))
+  }
+  const onDeleteAll = () => {
+    setTodos((prev) =>
+      prev.filter(todos => todos.done != true))
+  }
+
   return (
     <>
       <div>
@@ -53,46 +63,44 @@ export default function App() {
             onChange={(e) => setSearch(e.target.value)} />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}>
+            onChange={(e) =>
+              setStatusFilter(e.target.value)}>
             <option value="all">전체</option>
             <option value="active">미완료</option>
             <option value="done">완료</option>
           </select>
         </div>
 
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            addTodo(newTitle)
-          }}
+        <form onSubmit={(e) => {
+          e.preventDefault()
+          addTodo(newTitle)
+        }}
         >
-          <label htmlFor="newTodo">
-            새 할일
-          </label>
-          <input
-            id="newTodo"
+          <label htmlFor="newTodo">새 할일</label>
+          <input id="newTodo"
             placeholder="할 일을 입력하세요"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
           />
-          <button type="submit" disabled={newTitle.trim().length < 1}>추가</button>
+          <button type="submit" disabled=
+            {newTitle.trim().length < 1}>추가</button>
         </form>
 
-        <TodoList items={visibleTodos} onToggle={toggleTodo} />
+        <TodoList items={visibleTodos} onToggle={toggleTodo} onDelete={onDelete} />
 
         <p>
-          전체 {todos.length}개 / 미완료 {todos.filter((t) => !t.done).length}개
+          전체 {todos.length}개 / 미완료 {todos.filter((t) =>
+            !t.done).length}개
         </p>
+        <button onClick={onDeleteAll}>완료 항목 모두 삭제</button>
 
       </div>
     </>
   )
 }
 
-function TodoList({ items, onToggle }) {
+function TodoList({ items, onToggle, onDelete }) {
   if (items.length === 0) return <p>조건에 맞는 항목이 없습니다.</p>
-
   return (
     <ul>
       {items.map((t) => (
@@ -101,10 +109,14 @@ function TodoList({ items, onToggle }) {
             <input type="checkbox"
               checked={t.done}
               onChange={() => onToggle(t.id)} />
-            <span>{t.title}</span>
+            <span style={{ textDecoration: t.done ? "line-through" : "none" }}>
+              {t.title}
+            </span>
           </label>
+          <button onClick={() => onDelete(t.id)} style={{ margin: 5 }}>삭제</button>
         </li>
       ))}
     </ul>
   )
 }
+
